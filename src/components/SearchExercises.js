@@ -10,9 +10,23 @@ const SearchExercises = ({ setExercises, bodyPart, setBodyPart }) => {
 
   useEffect(() => {
     const fetchExercisesData = async () => {
-      const bodyPartsData = await fetchData('https://exercisedb.p.rapidapi.com/exercises/bodyPartList', exerciseOptions);
+      try {
+        const bodyPartsData = await fetchData('https://exercisedb.p.rapidapi.com/exercises/bodyPartList', exerciseOptions);
 
-      setBodyParts(['all', ...bodyPartsData]);
+        // Debugging: Log the fetched data and its type
+        console.log('Fetched Body Parts Data:', bodyPartsData);
+        console.log('Data Type:', typeof bodyPartsData);
+
+        if (Array.isArray(bodyPartsData)) {
+          setBodyParts(['all', ...bodyPartsData]);
+        } else {
+          console.error('Expected an array, but got:', bodyPartsData);
+          setBodyParts(['all']); // Fallback to a default value
+        }
+      } catch (error) {
+        console.error('Failed to fetch body parts data:', error);
+        setBodyParts(['all']); // Fallback to a default value
+      }
     };
 
     fetchExercisesData();
@@ -20,19 +34,23 @@ const SearchExercises = ({ setExercises, bodyPart, setBodyPart }) => {
 
   const handleSearch = async () => {
     if (search) {
-      const exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
+      try {
+        const exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
 
-      const searchedExercises = exercisesData.filter(
-        (item) => item.name.toLowerCase().includes(search)
-               || item.target.toLowerCase().includes(search)
-               || item.equipment.toLowerCase().includes(search)
-               || item.bodyPart.toLowerCase().includes(search),
-      );
+        const searchedExercises = exercisesData.filter(
+          (item) => item.name.toLowerCase().includes(search)
+                 || item.target.toLowerCase().includes(search)
+                 || item.equipment.toLowerCase().includes(search)
+                 || item.bodyPart.toLowerCase().includes(search),
+        );
 
-      window.scrollTo({ top: 1800, left: 100, behavior: 'smooth' });
+        window.scrollTo({ top: 1800, left: 100, behavior: 'smooth' });
 
-      setSearch('');
-      setExercises(searchedExercises);
+        setSearch('');
+        setExercises(searchedExercises);
+      } catch (error) {
+        console.error('Failed to fetch exercises data:', error);
+      }
     }
   };
 
